@@ -1,8 +1,11 @@
 import logging
+import time
 
 from deep_translator import GoogleTranslator
 
 logger = logging.getLogger(__name__)
+
+TARGET_LANG = "ru"
 
 _translator = None
 
@@ -10,7 +13,7 @@ _translator = None
 def get_translator():
     global _translator
     if _translator is None:
-        _translator = GoogleTranslator(source="zh-CN", target="ru")
+        _translator = GoogleTranslator(source="zh-CN", target=TARGET_LANG)
     return _translator
 
 
@@ -26,9 +29,24 @@ def translate_text(text: str, chunk_size: int = 1000) -> str:
     return "\n\n".join(parts)
 
 
-def translate_article(title: str, text: str) -> tuple[str, str]:
-    title_en = translate_text(title)
-    logger.info("Title translated: %s -> %s", title, title_en)
-    text_en = translate_text(text)
-    logger.info("Text translated (%d chars)", len(text))
-    return title_en, text_en
+def translate_blocks(blocks: list[tuple[str, str]]) -> list[tuple[str, str]]:
+    translated = []
+    for tag, text in blocks:
+        t = translate_text(text)
+        translated.append((tag, t))
+        time.sleep(0.3)
+    return translated
+
+
+def blocks_to_html(blocks: list[tuple[str, str]]) -> str:
+    return "\n".join(f"<{tag}>{text}</{tag}>" for tag, text in blocks)
+
+
+def translate_article(title: str, blocks: list[tuple[str, str]]) -> tuple[str, str]:
+    title_ru = translate_text(title)
+    logger.info("Title translated: %s -> %s", title, title_ru)
+
+    translated_blocks = translate_blocks(blocks)
+    html_ru = blocks_to_html(translated_blocks)
+    logger.info("Article translated: %d blocks", len(blocks))
+    return title_ru, html_ru
