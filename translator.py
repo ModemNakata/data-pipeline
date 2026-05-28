@@ -24,14 +24,18 @@ def translate_text(text: str, chunk_size: int = 1000) -> str:
     parts = []
     for i in range(0, len(text), chunk_size):
         chunk = text[i : i + chunk_size]
+        logger.debug("Translating chunk %d/%d (%d chars)", i // chunk_size + 1, (len(text) + chunk_size - 1) // chunk_size, len(chunk))
         translated = translator.translate(chunk)
         parts.append(translated)
     return "\n\n".join(parts)
 
 
 def translate_blocks(blocks: list[tuple[str, str]]) -> list[tuple[str, str]]:
+    total = len(blocks)
     translated = []
-    for tag, text in blocks:
+    for idx, (tag, text) in enumerate(blocks, 1):
+        preview = text[:50].replace("\n", " ")
+        logger.info("Translating block %d/%d [%s]: %s...", idx, total, tag, preview)
         t = translate_text(text)
         translated.append((tag, t))
         time.sleep(0.3)
