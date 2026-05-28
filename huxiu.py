@@ -4,7 +4,8 @@ from datetime import datetime
 import requests
 from bs4 import BeautifulSoup
 
-from db import insert_article
+from db import insert_article, update_article_translation
+from translator import translate_article
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s")
 logger = logging.getLogger(__name__)
@@ -60,7 +61,11 @@ def main():
         source_date=data["source_date"],
         published_at=data["published_at"],
     )
-    logger.info("Done: id=%d title=%s", article.id, article.title)
+    logger.info("Inserted article id=%d title=%s", article.id, article.title)
+
+    title_en, text_en = translate_article(article.title, article.text)
+    article = update_article_translation(article, title_en, text_en)
+    logger.info("Translated article id=%d", article.id)
 
 
 if __name__ == "__main__":

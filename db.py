@@ -28,7 +28,7 @@ class Article(Base):
     source_id = Column(Integer, nullable=False)
     source_name = Column(String, nullable=False)
     source_url = Column(String, nullable=False, unique=True)
-    source_date = Column(DateTime, nullable=True)
+    # source_date = Column(DateTime, nullable=True)
     published_at = Column(DateTime, nullable=False)
 
 
@@ -50,12 +50,12 @@ def insert_article(
     source_name: str,
     source_url: str,
     published_at: datetime,
-    source_date: datetime | None = None,
+    # source_date: datetime | None = None,
     title_translated: str | None = None,
     text_translated: str | None = None,
 ) -> Article:
     engine = get_engine()
-    with Session(engine) as session:
+    with Session(engine, expire_on_commit=False) as session:
         existing = session.query(Article).filter_by(source_url=source_url).first()
         if existing is not None:
             logger.warning(
@@ -67,7 +67,7 @@ def insert_article(
             existing.text = text
             existing.source_id = source_id
             existing.source_name = source_name
-            existing.source_date = source_date
+            # existing.source_date = source_date
             existing.published_at = published_at
             if title_translated is not None:
                 existing.title_translated = title_translated
@@ -84,10 +84,21 @@ def insert_article(
             source_id=source_id,
             source_name=source_name,
             source_url=source_url,
-            source_date=source_date,
+            # source_date=source_date,
             published_at=published_at,
         )
         session.add(article)
         session.commit()
         logger.info("Inserted article id=%d: %s", article.id, article.title)
         return article
+
+
+def update_article_translation(article: Article, title_translated: str, text_translated: str) -> Article:
+    engine = get_engine()
+    with Session(engine, expire_on_commit=False) as session:
+        merged = session.merge(article)
+        merged.title_translated = title_translated
+        merged.text_translated = text_translated
+        session.commit()
+        logger.info("Updated translation for article id=%d", merged.id)
+        return merged
