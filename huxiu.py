@@ -58,11 +58,15 @@ def parse_huxiu_article(url: str) -> dict:
     content_el = soup.select_one("div.article__content")
     blocks = parse_article_blocks(content_el) if content_el else []
 
+    img_el = soup.select_one("img.article-img")
+    img_source_url = img_el.get("src") if img_el else None
+
     return {
         "title": title,
         "blocks": blocks,
         "source_url": url,
         "source_date": source_date,
+        "img_source_url": img_source_url,
         "published_at": source_date or datetime.utcnow(),
     }
 
@@ -78,6 +82,7 @@ def main():
         source_id=SOURCE_ID,
         source_name=SOURCE_NAME,
         source_url=data["source_url"],
+        img_source_url=data["img_source_url"],
         published_at=data["published_at"],
     )
     logger.info("Inserted article id=%d title=%s", article.id, article.title)

@@ -28,7 +28,8 @@ class Article(Base):
     source_id = Column(Integer, nullable=False)
     source_name = Column(String, nullable=False)
     source_url = Column(String, nullable=False, unique=True)
-    # source_date = Column(DateTime, nullable=True)
+    img_source_url = Column(String, nullable=True)
+    img_local_path = Column(String, nullable=True)
     published_at = Column(DateTime, nullable=False)
 
 
@@ -50,7 +51,7 @@ def insert_article(
     source_name: str,
     source_url: str,
     published_at: datetime,
-    # source_date: datetime | None = None,
+    img_source_url: str | None = None,
     title_translated: str | None = None,
     text_translated: str | None = None,
 ) -> Article:
@@ -69,6 +70,8 @@ def insert_article(
             existing.source_name = source_name
             # existing.source_date = source_date
             existing.published_at = published_at
+            if img_source_url is not None:
+                existing.img_source_url = img_source_url
             if title_translated is not None:
                 existing.title_translated = title_translated
             if text_translated is not None:
@@ -84,7 +87,7 @@ def insert_article(
             source_id=source_id,
             source_name=source_name,
             source_url=source_url,
-            # source_date=source_date,
+            img_source_url=img_source_url,
             published_at=published_at,
         )
         session.add(article)
