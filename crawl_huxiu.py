@@ -67,7 +67,12 @@ def parse_huxiu_article(url: str) -> dict | None:
 
     time_el = soup.select_one("span.article__time")
     raw_date = time_el.get_text(strip=True) if time_el else ""
-    source_date = datetime.strptime(raw_date, "%Y-%m-%d %H:%M") if raw_date else None
+    source_date = None
+    if raw_date:
+        try:
+            source_date = datetime.strptime(raw_date, "%Y-%m-%d %H:%M")
+        except ValueError:
+            logger.warning("Could not parse date '%s' for %s", raw_date, url)
 
     content_el = soup.select_one("div.article__content")
     blocks = parse_article_blocks(content_el) if content_el else []
