@@ -82,6 +82,7 @@ def main():
         source_id=SOURCE_ID,
         source_name=SOURCE_NAME,
         source_url=data["source_url"],
+        source_date=data["source_date"],
         img_source_url=data["img_source_url"],
         published_at=data["published_at"],
     )
